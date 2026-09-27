@@ -58,13 +58,15 @@ python3 scripts/resolve_clients.py --profile mybiz && python3 scripts/organize.p
 
 ## Google Drive setup (15 minutes, once per Google account)
 Why OAuth and not a service account: a service account has no storage of its own, so Google refuses to let it write into your Drive. OAuth acts as you.
-1. Create a Drive folder for the output. Its ID is the last part of the URL. Put it in `.env` as `DRIVE_ROOT_FOLDER_ID`.
+1. Create a Drive folder for the output. Its ID is the last part of the URL. Put it in `.env` as `DRIVE_ROOT_FOLDER_ID`. (Skip this step if using `OFFERS` below — those roots auto-create.)
 2. In [Google Cloud Console](https://console.cloud.google.com/): create a project, then APIs & Services, enable **Google Drive API**.
 3. OAuth consent screen: External, add yourself under Test users.
 4. Credentials, Create credentials, **OAuth client ID**, application type **Desktop app**. Download the JSON to `profiles/mybiz/oauth-client.json`.
 5. `python3 scripts/drive_upload.py --profile mybiz --dry-run` (first run opens a browser to approve; token saves to `oauth-token.json`).
 6. Real run: `python3 scripts/run.py --profile mybiz` (no `--local-only`).
 Loose files already sitting in the Drive root from an old automation (e.g. Zapier) can be moved to `_Superseded/` with `python3 scripts/drive_upload.py --profile mybiz --sweep-root`. Nothing is ever deleted.
+
+**One Fathom account, multiple offers.** If the same Fathom key covers two separate businesses/products, set `OFFERS=Offer A,Offer B` in `.env` and explain how to tell them apart in `context.md`. The type gate then tags each call with its offer first; `organize.py` nests the local tree under `<Offer>/...` and `drive_upload.py` creates and uses a separate Drive root per offer (`DRIVE_ROOT_<OFFER_SLUG>`, written back to `.env` on first use) instead of `DRIVE_ROOT_FOLDER_ID`.
 
 ## How it works (architecture)
 ```
